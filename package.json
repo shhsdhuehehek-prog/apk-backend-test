@@ -1,7 +1,6 @@
 {
-  "name": "apk-backend-test",
+  "name": "android-backend",
   "version": "1.0.0",
-  "description": "Simple backend for APK testing",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
