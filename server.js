@@ -2,34 +2,40 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 8080;
-
 app.use(cors());
 app.use(express.json());
 
-// Test route (browser or Android)
+let lastPing = "No device connected";
+let messageToPhone = "Hello from Railway 👋";
+
+// Phone sends status
+app.post("/ping", (req, res) => {
+  lastPing = new Date().toISOString();
+  res.json({ status: "ok" });
+});
+
+// Phone fetches message
+app.get("/message", (req, res) => {
+  res.json({ message: messageToPhone });
+});
+
+// Dashboard (browser)
 app.get("/", (req, res) => {
-  res.status(200).send("Backend is running");
+  res.send(`
+    <h2>Android Device Dashboard</h2>
+    <p>Last ping: ${lastPing}</p>
+    <form method="POST" action="/set-message">
+      <input name="msg" placeholder="Message to phone"/>
+      <button>Send</button>
+    </form>
+  `);
 });
 
-// Android app endpoint
-app.get("/mirror", (req, res) => {
-  console.log("Mirror request received from Android");
-  res.status(200).json({
-    status: "ok",
-    message: "Android connected to Railway backend"
-  });
+// Update message
+app.post("/set-message", express.urlencoded({ extended: true }), (req, res) => {
+  messageToPhone = req.body.msg;
+  res.redirect("/");
 });
 
-// Future POST data from phone
-app.post("/mirror", (req, res) => {
-  console.log("Data from phone:", req.body);
-  res.status(200).json({
-    received: true,
-    data: req.body
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Server running on port " + PORT));
